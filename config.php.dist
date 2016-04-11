@@ -1,0 +1,11 @@
+<?php
+$wikis = array(
+    //gitlab wiki git url => wordpress page ID
+    'git@gitlab.example.org:group/project.wiki.git' => 12,
+);
+$wordpress = array(
+    'url'      => 'http://wordpress.example.org/',
+    'username' => 'gitlabwikisync',
+    'password' => 'abc',
+);
+?>
