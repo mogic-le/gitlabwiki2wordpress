@@ -13,17 +13,20 @@ foreach ($GLOBALS['wikis'] as $gitUrl => $mainPageId) {
 
 function sync_wiki($gitUrl, $mainPageId)
 {
+    logMsg('Processing ' . $gitUrl);
     $pathName = str_replace('/', '-', $gitUrl);
     $path = __DIR__ . '/tmp/' . $pathName . '/';
     if (!is_dir(__DIR__ . '/tmp/')) {
         mkdir(__DIR__ . '/tmp');
     }
     if (!is_dir($path)) {
-        exec('git clone ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path));
+        exec('git clone ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path) . ' 2>&1');
     } else {
         chdir($path);
-        exec('git pull');
+        exec('git pull' . ' 2>&1');
     }
+
+    $wikiBaseUrl = getWikiBaseFromGitUrl($gitUrl);
 
     $pages = listPages($mainPageId);
     chdir($path);
@@ -35,7 +38,15 @@ function sync_wiki($gitUrl, $mainPageId)
             $title = substr($file, 0, -3);
         }
 
-        $content = '[markdown]' . file_get_contents($file) . '[/markdown]';
+        $wikiUrl = $wikiBaseUrl . substr($file, 0, -3);
+        $content = '[markdown]' . file_get_contents($file) . '[/markdown]'
+            . '<hr/>'
+            . '<p class="gitlabedit">'
+            . '<a href="' . htmlspecialchars($wikiUrl) . '">view</a>'
+            . ' or <a href="' . htmlspecialchars($wikiUrl . '/edit') . '">edit</a>'
+            . ' in GitLab'
+            . '</p>';
+
         if (isset($pages[$title])) {
             //page exists already in wordpress
             $needsupdate = false;
@@ -48,7 +59,7 @@ function sync_wiki($gitUrl, $mainPageId)
             }
 
             if ($needsupdate) {
-                echo "Updating $file\n";
+                logMsg("Updating $file");
                 $json = array(
                     'content' => $content,
                     'date'    => date('c', filectime($file)),
@@ -62,7 +73,7 @@ function sync_wiki($gitUrl, $mainPageId)
             $pages[$title]->inwp = true;
         } else {
             //page does not exist in wordpress
-            echo "Creating $file\n";
+            logMsg("Creating $file");
             $json = array(
                 'parent'  => $mainPageId,
                 'content' => $content,
@@ -86,6 +97,12 @@ function sync_wiki($gitUrl, $mainPageId)
     }
 }
 
+function logMsg($msg)
+{
+    if ($GLOBALS['log']) {
+        echo $msg . "\n";
+    }
+}
 
 function listPages($parentId)
 {
@@ -148,5 +165,14 @@ function getWordpressUrl($relUrl)
         . ':' . $GLOBALS['wordpress']['password'] . '@',
         rtrim($GLOBALS['wordpress']['url'], '/')
     ) . $relUrl;
+}
+
+function getWikiBaseFromGitUrl($gitUrl)
+{
+    if (!preg_match('#^(.+)@(.+):(.+).wiki.git$#', $gitUrl, $matches)) {
+        return false;
+    }
+    list($all, $user, $host, $path) = $matches;
+    return 'https://' . $host . '/' . $path . '/wikis/';
 }
 ?>

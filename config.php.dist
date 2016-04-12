@@ -8,4 +8,5 @@ $wordpress = array(
     'username' => 'gitlabwikisync',
     'password' => 'abc',
 );
+$log = true;
 ?>
