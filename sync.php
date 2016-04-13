@@ -27,6 +27,7 @@ function sync_wiki($gitUrl, $mainPageId)
     }
 
     $wikiBaseUrl = getWikiBaseFromGitUrl($gitUrl);
+    $imgBaseUrl = substr($wikiBaseUrl, 0, -6);//strip wikis/
 
     $pages = listPages($mainPageId);
     chdir($path);
@@ -38,8 +39,15 @@ function sync_wiki($gitUrl, $mainPageId)
             $title = substr($file, 0, -3);
         }
 
-        $wikiUrl = $wikiBaseUrl . substr($file, 0, -3);
-        $content = '[markdown]' . file_get_contents($file) . '[/markdown]'
+        $wikiUrl     = $wikiBaseUrl . substr($file, 0, -3);
+        $wikiContent = file_get_contents($file);
+        $wikiContent = str_replace(
+            '](/uploads/',
+            '](' . $imgBaseUrl . 'uploads/',
+            $wikiContent
+        );
+
+        $content = '[markdown]' . $wikiContent . '[/markdown]'
             . '<hr/>'
             . '<p class="gitlabedit">'
             . '<a href="' . htmlspecialchars($wikiUrl) . '">view</a>'
