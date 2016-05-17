@@ -20,10 +20,10 @@ function sync_wiki($gitUrl, $mainPageId)
         mkdir(__DIR__ . '/tmp');
     }
     if (!is_dir($path)) {
-        exec('git clone ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path) . ' 2>&1');
+        passthru('git clone --quet ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path));
     } else {
         chdir($path);
-        exec('git pull' . ' 2>&1');
+        passthru('git pull --quiet');
     }
 
     $wikiBaseUrl = getWikiBaseFromGitUrl($gitUrl);
