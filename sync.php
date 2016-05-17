@@ -20,10 +20,14 @@ function sync_wiki($gitUrl, $mainPageId)
         mkdir(__DIR__ . '/tmp');
     }
     if (!is_dir($path)) {
-        passthru('git clone --quet ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path));
+        passthru('git clone --quiet ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path), $retval);
     } else {
         chdir($path);
-        passthru('git pull --quiet');
+        passthru('git pull --quiet', $retval);
+    }
+    if ($retval != 0) {
+        file_put_contents('php://stderr', "Error fetching gitlab wiki\n");
+        exit(1);
     }
 
     $wikiBaseUrl = getWikiBaseFromGitUrl($gitUrl);
