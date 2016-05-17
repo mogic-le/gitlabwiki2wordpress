@@ -19,11 +19,22 @@ function sync_wiki($gitUrl, $mainPageId)
     if (!is_dir(__DIR__ . '/tmp/')) {
         mkdir(__DIR__ . '/tmp');
     }
+
+    $cmdprefix = '';
+    if (file_exists(__DIR__ . '/ssh_key')) {
+        $cmdprefix = 'GIT_SSH_COMMAND="ssh -o IdentitiesOnly=yes'
+            . ' -i ' . __DIR__ . '/ssh_key" ';
+    }
     if (!is_dir($path)) {
-        passthru('git clone --quiet ' . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path), $retval);
+        passthru(
+            $cmdprefix
+            . 'git clone --quiet '
+            . escapeshellarg($gitUrl) . ' ' . escapeshellarg($path),
+            $retval
+        );
     } else {
         chdir($path);
-        passthru('git pull --quiet', $retval);
+        passthru($cmdprefix . 'git pull --quiet', $retval);
     }
     if ($retval != 0) {
         file_put_contents('php://stderr', "Error fetching gitlab wiki\n");

@@ -19,6 +19,17 @@ Installation
 #. Run ``./sync.php`` via cron every hour or so
 
 
+Custom SSH key
+==============
+``sync.php`` exclusively uses the ``ssh_key`` key file if it exists.
+
+Generate it with the following command::
+
+    $ ssh-keygen -N "" -C gitlab2wordpress -f ssh_key
+
+Then assign the contents of ``ssh_key.pub`` to a gitlab user.
+
+
 ============
 Dependencies
 ============

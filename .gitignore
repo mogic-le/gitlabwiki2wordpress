@@ -1,2 +1,4 @@
 /config.php
 /tmp/
+ssh_key
+ssh_key.pub
