@@ -184,8 +184,8 @@ function getWordpressUrl($relUrl)
 {
     return str_replace(
         '://',
-        '://' . $GLOBALS['wordpress']['username']
-        . ':' . $GLOBALS['wordpress']['password'] . '@',
+        '://' . urlencode($GLOBALS['wordpress']['username'])
+        . ':' . urlencode($GLOBALS['wordpress']['password']) . '@',
         rtrim($GLOBALS['wordpress']['url'], '/')
     ) . $relUrl;
 }
